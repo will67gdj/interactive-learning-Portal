@@ -1,142 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Learning Portal</title>
 
     <style>
         body {
-            margin: 0;
-            background: #f4f6fb;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #222;
-        }
-
-        /* Educational style header */
-        .edu-header {
-            background: #4a8bff;
-            color: white;
+            font-family: Arial, sans-serif;
             padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .edu-header h1 {
-            margin: 0;
-            font-size: 26px;
-        }
-
-        .edu-header p {
-            margin: 4px 0 0;
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
-        /* Chat box */
-        #chat {
-            width: 90%;
-            max-width: 800px;
-            height: 60vh;
-            overflow-y: auto;
-            margin: 20px auto;
-            background: white;
+        .code-box {
+            background: #111;
+            color: #0f0;
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+            font-family: monospace;
+            margin-top: 10px;
+            white-space: pre-wrap;
         }
 
-        /* Input footer */
-        #input-area {
-            width: 90%;
-            max-width: 800px;
-            margin: 0 auto 20px;
-            display: flex;
-            gap: 10px;
+        a {
+            font-size: 18px;
+            color: #2a7fff;
+            text-decoration: none;
         }
 
-        #input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 15px;
-        }
-
-        #send {
-            padding: 12px 20px;
-            background: #4a8bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        #send:hover {
-            background: #2f6bdd;
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="edu-header">
-        <h1>Interactive Learning Portal</h1>
-        <p>Collaborative student communication platform</p>
-    </div>
+    <h1>Chat App Access</h1>
 
-    <div id="chat"></div>
+    <p>
+        ✅ **Click this link to open the live chat app:**  
+        <br>
+        <a href="https://your-live-url.onrender.com" target="_blank">
+            Open Chat App
+        </a>
+    </p>
 
-    <div id="input-area">
-        <input id="input" type="text" placeholder="Type your message..." autocomplete="off">
-        <button id="send">Send</button>
-    </div>
+    <p>
+        ✅ **If the link does not work for you, copy this code instead and run it locally:**
+    </p>
 
-    <script>
-        // Ask for username
-        let username = "";
-        while (!username) {
-            username = prompt("Please enter a username:");
-        }
+    <div class="code-box">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Chat App&lt;/title&gt;
+&lt;/head&gt;
 
-        // WebSocket connection
-        const ws = new WebSocket(location.origin.replace(/^http/, "ws"));
+&lt;body&gt;
+    &lt;h2&gt;Chat App (Offline Version)&lt;/h2&gt;
 
-        const chat = document.getElementById("chat");
-        const input = document.getElementById("input");
-        const sendBtn = document.getElementById("send");
+    &lt;div id="messages"&gt;&lt;/div&gt;
 
+    &lt;input id="input" placeholder="Type here..."&gt;
+    &lt;button onclick="send()"&gt;Send&lt;/button&gt;
+
+    &lt;script&gt;
         function send() {
-            const msg = input.value.trim();
-            if (!msg) return;
-
-            ws.send(JSON.stringify({
-                username: username,
-                message: msg
-            }));
-
-            input.value = "";
-        }
-
-        sendBtn.onclick = send;
-
-        input.onkeydown = (e) => {
-            if (e.key === "Enter") send();
-        };
-
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
+            const msg = document.getElementById("input").value;
+            const box = document.getElementById("messages");
 
             const p = document.createElement("p");
+            p.textContent = msg;
 
-            p.innerHTML =
-                `<strong style="color:${data.color}">${data.username}:</strong> ${data.message}`;
+            box.appendChild(p);
 
-            chat.appendChild(p);
-            chat.scrollTop = chat.scrollHeight;
-        };
-    </script>
+            document.getElementById("input").value = "";
+        }
+    &lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+    </div>
+
+    <p>
+        ✅ Anyone can copy this offline version into a file called <strong>index.html</strong>
+        and open it in any browser.
+    </p>
 
 </body>
 </html>
