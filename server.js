@@ -14,4 +14,4 @@ wss.on("connection", (ws) => {
             }
         });
     });
-}); and 
+});
