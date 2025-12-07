@@ -1,107 +1,142 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Chat App</title>
-  <style>
-    body {
-      background: #111;
-      color: white;
-      font-family: Arial;
-      padding: 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Learning Portal</title>
 
-    #chat {
-      width: 100%;
-      height: 70vh;
-      overflow-y: auto;
-      background: #222;
-      padding: 10px;
-      border-radius: 10px;
-    }
+    <style>
+        body {
+            margin: 0;
+            background: #f4f6fb;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #222;
+        }
 
-    #inputBox {
-      margin-top: 10px;
-      display: flex;
-      gap: 10px;
-    }
+        /* Educational style header */
+        .edu-header {
+            background: #4a8bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-    input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-    }
+        .edu-header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
 
-    button {
-      padding: 10px 20px;
-      background: #0a84ff;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-weight: bold;
-    }
+        .edu-header p {
+            margin: 4px 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
 
-    button:hover {
-      background: #0066cc;
-    }
-  </style>
+        /* Chat box */
+        #chat {
+            width: 90%;
+            max-width: 800px;
+            height: 60vh;
+            overflow-y: auto;
+            margin: 20px auto;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+        }
+
+        /* Input footer */
+        #input-area {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        #input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        #send {
+            padding: 12px 20px;
+            background: #4a8bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #send:hover {
+            background: #2f6bdd;
+        }
+    </style>
 </head>
+
 <body>
 
-<h2>My Chat App</h2>
+    <div class="edu-header">
+        <h1>Interactive Learning Portal</h1>
+        <p>Collaborative student communication platform</p>
+    </div>
 
-<div id="chat"></div>
+    <div id="chat"></div>
 
-<div id="inputBox">
-  <input id="input" placeholder="Type a message..." autocomplete="off" />
-  <button id="send">Send</button>
-</div>
+    <div id="input-area">
+        <input id="input" type="text" placeholder="Type your message..." autocomplete="off">
+        <button id="send">Send</button>
+    </div>
 
-<script>
-let username = "";
+    <script>
+        // Ask for username
+        let username = "";
+        while (!username) {
+            username = prompt("Please enter a username:");
+        }
 
-// Ask for username immediately
-while (!username) {
-  username = prompt("Enter your username:");
-}
+        // WebSocket connection
+        const ws = new WebSocket(location.origin.replace(/^http/, "ws"));
 
-const ws = new WebSocket(
-  location.origin.replace(/^http/, "ws")
-);
+        const chat = document.getElementById("chat");
+        const input = document.getElementById("input");
+        const sendBtn = document.getElementById("send");
 
-const chat = document.getElementById("chat");
-const input = document.getElementById("input");
-const sendBtn = document.getElementById("send");
+        function send() {
+            const msg = input.value.trim();
+            if (!msg) return;
 
-sendBtn.onclick = send;
-input.onkeydown = (e) => {
-  if (e.key === "Enter") send();
-};
+            ws.send(JSON.stringify({
+                username: username,
+                message: msg
+            }));
 
-function send() {
-  const message = input.value.trim();
-  if (!message) return;
+            input.value = "";
+        }
 
-  ws.send(JSON.stringify({
-    username,
-    message
-  }));
+        sendBtn.onclick = send;
 
-  input.value = "";
-}
+        input.onkeydown = (e) => {
+            if (e.key === "Enter") send();
+        };
 
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
 
-  const p = document.createElement("p");
-  p.innerHTML =
-    `<strong style="color:${data.color}">${data.username}:</strong> ${data.message}`;
+            const p = document.createElement("p");
 
-  chat.appendChild(p);
-  chat.scrollTop = chat.scrollHeight;
-};
-</script>
+            p.innerHTML =
+                `<strong style="color:${data.color}">${data.username}:</strong> ${data.message}`;
+
+            chat.appendChild(p);
+            chat.scrollTop = chat.scrollHeight;
+        };
+    </script>
 
 </body>
 </html>
