@@ -1,93 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chat App</title>
-    <style>
-        body {
-            background: #111;
-            color: white;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
+  <title>Chat App</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial;
+      padding: 20px;
+    }
 
-        #messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-        }
+    #chat {
+      width: 100%;
+      height: 70vh;
+      overflow-y: auto;
+      background: #222;
+      padding: 10px;
+      border-radius: 10px;
+    }
 
-        #input-area {
-            display: flex;
-            padding: 10px;
-            background: #222;
-        }
+    #inputBox {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
 
-        #input {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            outline: none;
-        }
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+    }
 
-        #send {
-            margin-left: 10px;
-            padding: 10px 20px;
-            background: dodgerblue;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-weight: bold;
-        }
-    </style>
+    button {
+      padding: 10px 20px;
+      background: #0a84ff;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #0066cc;
+    }
+  </style>
 </head>
 <body>
 
-    <div id="messages"></div>
+<h2>My Chat App</h2>
 
-    <div id="input-area">
-        <input id="input" type="text" placeholder="Type a message..." />
-        <button id="send">Send</button>
-    </div>
+<div id="chat"></div>
 
-    <script>
-        const socket = new WebSocket(`wss://${window.location.host}`);
+<div id="inputBox">
+  <input id="input" placeholder="Type a message..." autocomplete="off" />
+  <button id="send">Send</button>
+</div>
 
-        const messagesDiv = document.getElementById("messages");
-        const input = document.getElementById("input");
-        const sendBtn = document.getElementById("send");
+<script>
+let username = "";
 
-        function addMessage(text) {
-            const div = document.createElement("div");
-            div.textContent = text;
-            div.style.padding = "5px 0";
-            messagesDiv.appendChild(div);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
+// Ask for username immediately
+while (!username) {
+  username = prompt("Enter your username:");
+}
 
-        socket.onmessage = (event) => {
-            addMessage(event.data);
-        };
+const ws = new WebSocket(
+  location.origin.replace(/^http/, "ws")
+);
 
-        sendBtn.onclick = () => {
-            if (input.value.trim() !== "") {
-                socket.send(input.value);
-                input.value = "";
-            }
-        };
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("send");
 
-        input.addEventListener("keyup", (e) => {
-            if (e.key === "Enter") {
-                sendBtn.onclick();
-            }
-        });
-    </script>
+sendBtn.onclick = send;
+input.onkeydown = (e) => {
+  if (e.key === "Enter") send();
+};
+
+function send() {
+  const message = input.value.trim();
+  if (!message) return;
+
+  ws.send(JSON.stringify({
+    username,
+    message
+  }));
+
+  input.value = "";
+}
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+
+  const p = document.createElement("p");
+  p.innerHTML =
+    `<strong style="color:${data.color}">${data.username}:</strong> ${data.message}`;
+
+  chat.appendChild(p);
+  chat.scrollTop = chat.scrollHeight;
+};
+</script>
 
 </body>
 </html>
