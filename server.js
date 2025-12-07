@@ -4,37 +4,43 @@ const http = require("http");
 const WebSocket = require("ws");
 
 const app = express();
-const port = process.env.PORT || 10000;
-
-// Serve the public folder
-app.use(express.static(path.join(__dirname, "public")));
-
-// Create HTTP server
 const server = http.createServer(app);
-
-// Create WebSocket server
 const wss = new WebSocket.Server({ server });
 
+app.use(express.static(path.join(__dirname, "public")));
+
+const clients = new Map(); // Store each user's color
+
 wss.on("connection", (ws) => {
-    console.log("A user connected");
+  console.log("A user connected");
 
-    ws.on("message", (message) => {
-        console.log("Received:", message.toString());
+  // Generate a random color for the user
+  const color = "#" + Math.floor(Math.random() * 16777215).toString(16);
 
-        // Broadcast message to all clients
-        wss.clients.forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(message.toString());
-            }
-        });
+  // Save the user’s color
+  clients.set(ws, { color });
+
+  ws.on("message", (msg) => {
+    let data = JSON.parse(msg);
+
+    // Attach the user’s color
+    data.color = clients.get(ws).color;
+
+    // Broadcast to all users
+    const json = JSON.stringify(data);
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(json);
+      }
     });
+  });
 
-    ws.on("close", () => {
-        console.log("A user disconnected");
-    });
+  ws.on("close", () => {
+    console.log("A user disconnected");
+    clients.delete(ws);
+  });
 });
 
-// Start server
-server.listen(port, () => {
-    console.log("Chat server running on port", port);
-});
+// Render uses PORT — default to localhost:10000
+const PORT = process.env.PORT || 10000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
